@@ -161,6 +161,7 @@ namespace LancoltVerem
 			l.Diagnosztika();
 
 			Console.WriteLine(l.Count);
+			// l.Count = -3; // ez nem működik, és ez így is helyes!
 			l.Diagnosztika();
 			Console.WriteLine(l[2]);
 			l.Diagnosztika();
