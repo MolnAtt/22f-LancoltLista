@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,16 +9,15 @@ namespace LancoltVerem
 	internal class Program
 	{
 
-		class LancoltLista
+		class LancoltLista<T>
 		{
-
-			public class Elem
+			public class Elem<T>
 			{
-				public Elem bal;
-				public int tartalom;
-				public Elem jobb;
+				public Elem<T> bal;
+				public T tartalom;
+				public Elem<T> jobb;
 
-				Elem(Elem bal, int tartalom, Elem jobb) // ide vissza lehetne vezetni a többi konstruktort!
+				Elem(Elem<T> bal, T tartalom, Elem<T> jobb) // ide vissza lehetne vezetni a többi konstruktort!
 				{
 					this.bal = bal;
 					this.tartalom = tartalom;
@@ -27,11 +27,11 @@ namespace LancoltVerem
 				public Elem() 
 				{
 					this.bal = this;
-					this.tartalom = 42;
+					this.tartalom = default;
 					this.jobb = this;
 				}
 
-				public Elem(Elem e, int t) // beszúrás e elem mögé
+				public Elem(Elem<T> e, T t) // beszúrás e elem mögé
 				{
 					this.bal = e;
 					this.tartalom = t;
@@ -47,60 +47,49 @@ namespace LancoltVerem
 				}
 
 			}
-
-			Elem fejelem;
+			Elem<T> fejelem;
 			public int Count { get; private set; }
-
-
 			public LancoltLista()
 			{
-				this.fejelem = new Elem();
+				this.fejelem = new Elem<T>();
 				this.Count = 0;
 			}
-
-			public void Add(int x) 
+			public void Add(T x) 
 			{
-				new Elem(Utolso(), x);
+				new Elem<T>(Utolso(), x);
 				Count++;
 			}
-
-			public Elem Utolso()
+			Elem<T> Utolso() => fejelem.bal;
+			Elem<T> Keres(T x)
 			{
-				return fejelem.bal;
-			}
-
-
-			public Elem Keres(int x)
-			{
-				Elem i = fejelem.jobb;
-				while (i!= fejelem && i.tartalom != x)
+				Elem<T> i = fejelem.jobb;
+				while (i != fejelem && !i.tartalom.Equals(x))
 				{
 					i = i.jobb;
 				}
 				return i != fejelem ? i : null;
 			}
-
-			public void Remove(int x)
+			public void Remove(T x)
 			{
-				Elem torlendo = Keres(x);
+				Elem<T> torlendo = Keres(x);
 				if (torlendo != null)
+				{
 					torlendo.Töröl();
-				Count--;
+					Count--;
+				}
 			}
-
-			public Elem At(int index)
+			Elem<T> At(int index)
 			{
-				if (Count <= index || index<0)
+				if (Count <= index || index < 0)
 					throw new IndexOutOfRangeException();
 
-				Elem i = fejelem.jobb;
+				Elem<T> i = fejelem.jobb;
 				for (int szamlalo = 0; szamlalo < index; szamlalo++)
 					i = i.jobb;
 
 				return i;
 			}
-
-			public int this[int index]
+			public T this[int index]
 			{
 				get // "= jel jobb oldalán van"
 				{
@@ -111,19 +100,16 @@ namespace LancoltVerem
 					At(index).tartalom = value;
 				}
 			}
-
 			public void RemoveAt(int i)
 			{
 				At(i).Töröl();
 				Count--;
 			}
-
-
 			public void Diagnosztika()
 			{
 				string s = "F = ";
 
-				Elem i = fejelem.jobb; // mint iterátor!
+				Elem<T> i = fejelem.jobb; // mint iterátor!
 
 				while (i != fejelem)
 				{
@@ -135,39 +121,39 @@ namespace LancoltVerem
 
                 Console.WriteLine(s);
             }
+			public T Max(Func<T,T,int> comparator)
+			{
+				if (Count==0)
+					throw new IndexOutOfRangeException();
+
+				Elem<T> i = fejelem.jobb;
+				T best = i.tartalom;
+				while (i!=fejelem)
+				{
+					if (comparator(best,i.tartalom) == -1)
+					{
+						best = i.tartalom;
+                    }
+					i = i.jobb;
+				}
+				return best;
+			}
 		}
 
 		static void Main(string[] args)
 		{
-			LancoltLista l = new LancoltLista();
+			LancoltLista<string> l = new LancoltLista<string>();
 
-			l.Add(2);
-			l.Add(3);
-			l.Add(7);
-            l.Remove(2);
-            // l.RemoveAt(0);
-
-            Console.WriteLine(l);
-			l.Diagnosztika();
-
-			l.Add(5);
-			l.Diagnosztika();
-			l.Add(9);
-			l.Diagnosztika();
-			l.Add(9);
+			l.Add("a");
+			l.Add("asvd");
+			l.Add("a");
+			l.Add("1wer");
+			l.Add("5aasdf");
+			l.Add("aasdfdf");
 			l.Diagnosztika();
 
-			l.RemoveAt(4);
-			l.Diagnosztika();
-
-			Console.WriteLine(l.Count);
-			// l.Count = -3; // ez nem működik, és ez így is helyes!
-			l.Diagnosztika();
-			Console.WriteLine(l[2]);
-			l.Diagnosztika();
-
-			l[2] = 12;
-			l.Diagnosztika();
+			Console.WriteLine(l.Max((s, t) => s.Length < t.Length ? -1 : (s.Length == t.Length ? 0 : 1)));
+			Console.WriteLine(l.Max((s, t) => s.CompareTo(t)));
 
 		}
 	}
