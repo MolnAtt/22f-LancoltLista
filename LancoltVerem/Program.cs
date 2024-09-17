@@ -230,15 +230,17 @@ namespace LancoltVerem
 
 				return i.tartalom;
 			}
-
-			//public bool Contains(Func<T, bool> predicate)
-			//{
-
-			//}
-			//public bool Contains(T elem)
-			//{
-
-			//}
+			public bool Contains(Func<T, bool> predicate)
+			{
+				Elem<T> i = fejelem.jobb;
+				while (i != fejelem && !predicate(i.tartalom))
+				{
+					i = i.jobb;
+				}
+				return i != fejelem;
+			}
+			public bool Contains(T elem) => Keres(elem) != null;
+			//public bool Contains(T elem) => Contains(x=> x.Equals(elem));
 
 		}
 
