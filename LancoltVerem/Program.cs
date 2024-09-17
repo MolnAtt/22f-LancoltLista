@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -171,6 +172,74 @@ namespace LancoltVerem
 				return result;
 			}
 
+			public int FindIndex(Func<T,bool> predicate)
+			{
+				int index = 0;
+				Elem<T> i = fejelem.jobb;
+				while (i != fejelem && !predicate(i.tartalom))
+				{
+					i = i.jobb;
+					index++;
+				}
+				return i != fejelem ? index : -1;
+			}
+			public int FindLastIndex(Func<T, bool> predicate)
+			{
+				int index = Count-1;
+				Elem<T> i = fejelem.bal;
+				while (i != fejelem && !predicate(i.tartalom))
+				{
+					i = i.bal;
+					index--;
+				}
+				return i != fejelem ? index : -1;
+			}
+			public T First(Func<T, bool> predicate)
+			{
+				Elem<T> i = fejelem.jobb;
+				while (i != fejelem && !predicate(i.tartalom))
+				{
+					i = i.jobb;
+				}
+				if (i == fejelem)
+					throw new Exception("Ilyen tulajdonságú elem nincs a listában");
+
+				return i.tartalom;
+			}
+			public T First()
+			{
+				if (Count == 0)
+					throw new Exception("Nincs is elem a listában!");
+				return fejelem.jobb.tartalom;
+			}
+			public T Last()
+			{
+				if (Count == 0)
+					throw new Exception("Nincs is elem a listában!");
+				return fejelem.bal.tartalom;
+			}
+			public T Last(Func<T, bool> predicate)
+			{
+				Elem<T> i = fejelem.bal;
+				while (i != fejelem && !predicate(i.tartalom))
+				{
+					i = i.bal;
+				}
+				if (i == fejelem)
+					throw new Exception("Ilyen tulajdonságú elem nincs a listában");
+
+				return i.tartalom;
+			}
+
+			//public bool Contains(Func<T, bool> predicate)
+			//{
+
+			//}
+			//public bool Contains(T elem)
+			//{
+
+			//}
+
 		}
 
 		static void Main(string[] args)
@@ -179,7 +248,7 @@ namespace LancoltVerem
 
 			l.Add("a");
 			l.Add("asvd");
-			l.Add("a");
+			l.Add("ab");
 			l.Add("1wer");
 			l.Add("5aasdf");
 			l.Add("aasdfdf");
@@ -187,8 +256,10 @@ namespace LancoltVerem
 
 			Console.WriteLine(l.Max((s, t) => s.Length < t.Length ? -1 : (s.Length == t.Length ? 0 : 1)));
 			Console.WriteLine(l.Max((s, t) => s.CompareTo(t)));
-			l.Select(s => "- " + s).Diagnosztika();
+			//l.Select(s => "- " + s).Diagnosztika();
 
-		}
+            Console.WriteLine(l.First(x => x.Length==2));
+
+        }
 	}
 }
