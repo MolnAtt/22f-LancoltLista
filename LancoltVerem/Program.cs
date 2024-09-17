@@ -24,7 +24,7 @@ namespace LancoltVerem
 					this.jobb = jobb;
 				}
 
-				public Elem() 
+				public Elem()
 				{
 					this.bal = this;
 					this.tartalom = default;
@@ -54,7 +54,7 @@ namespace LancoltVerem
 				this.fejelem = new Elem<T>();
 				this.Count = 0;
 			}
-			public void Add(T x) 
+			public void Add(T x)
 			{
 				new Elem<T>(Utolso(), x);
 				Count++;
@@ -119,25 +119,58 @@ namespace LancoltVerem
 
 				s += "F";
 
-                Console.WriteLine(s);
-            }
-			public T Max(Func<T,T,int> comparator)
+				Console.WriteLine(s);
+			}
+			public T Max(Func<T, T, int> comparator)
 			{
-				if (Count==0)
+				if (Count == 0)
 					throw new IndexOutOfRangeException();
 
 				Elem<T> i = fejelem.jobb;
 				T best = i.tartalom;
-				while (i!=fejelem)
+				while (i != fejelem)
 				{
-					if (comparator(best,i.tartalom) == -1)
+					if (comparator(best, i.tartalom) == -1)
 					{
 						best = i.tartalom;
-                    }
+					}
 					i = i.jobb;
 				}
 				return best;
 			}
+
+			public LancoltLista<T> Where(Func<T, bool> predicate)
+			{
+				LancoltLista<T> result = new LancoltLista<T>();
+
+				Elem<T> i = fejelem.jobb;
+
+				while (i != fejelem) 
+				{
+					if (predicate(i.tartalom))
+					{
+						result.Add(i.tartalom);
+					}
+				}
+
+				return result;
+			}
+
+			public LancoltLista<S> Select<S>(Func<T, S> selector)
+			{
+				LancoltLista<S> result = new LancoltLista<S>();
+
+				Elem<T> i = fejelem.jobb;
+
+				while (i != fejelem)
+				{
+					result.Add(selector(i.tartalom));
+					i = i.jobb;
+				}
+
+				return result;
+			}
+
 		}
 
 		static void Main(string[] args)
@@ -154,6 +187,7 @@ namespace LancoltVerem
 
 			Console.WriteLine(l.Max((s, t) => s.Length < t.Length ? -1 : (s.Length == t.Length ? 0 : 1)));
 			Console.WriteLine(l.Max((s, t) => s.CompareTo(t)));
+			l.Select(s => "- " + s).Diagnosztika();
 
 		}
 	}
